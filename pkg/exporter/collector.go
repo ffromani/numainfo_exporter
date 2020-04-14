@@ -102,48 +102,31 @@ func (co Collector) Collect(ch chan<- prometheus.Metric) {
 	coresAlloc, err := co.kubeletInfo.GetCoresAllocation(tp)
 	if err != nil {
 		klog.Warningf("failed to get the current cores allocation: %v", err)
-		return
+		// go ahead anyway: export as much data as we can.
 	}
 
-	m, err := prometheus.NewConstMetric(
-		numaNodesDesc,
-		prometheus.GaugeValue,
-		float64(tp.NUMANodeCount),
-		co.nodeName,
-	)
-	if err != nil {
-		klog.Warningf("failed to create the NUMA nodes metric: %v", err)
-		return
-	}
-	ch <- m
+	tryToSendGauge(ch, numaNodesDesc, float64(tp.NUMANodeCount), co.nodeName)
 
 	for _, node := range tp.NUMANodes {
-		m, err := prometheus.NewConstMetric(
-			coreCountDesc,
-			prometheus.GaugeValue,
-			float64(len(node.Cores)),
-			co.nodeName,
-			fmt.Sprintf("node%02d", node.Id),
-			"capacity",
-		)
-		if err != nil {
-			klog.Warningf("failed to create the CPU cores capacity: %v", err)
-			continue
-		}
-		ch <- m
+		nodeLabel := fmt.Sprintf("node%02d", node.Id)
 
-		m, err = prometheus.NewConstMetric(
-			coreCountDesc,
-			prometheus.GaugeValue,
-			float64(coresAlloc[node.Id]),
-			co.nodeName,
-			fmt.Sprintf("node%02d", node.Id),
-			"allocation",
-		)
-		if err != nil {
-			klog.Warningf("failed to create the CPU cores allocation: %v", err)
-			continue
+		tryToSendGauge(ch, coreCountDesc, float64(len(node.Cores)), co.nodeName, nodeLabel, "capacity")
+		if len(coresAlloc) > 0 {
+			// reporting allocation=0 is misleading. If we have no data, we need to report nothing.
+			tryToSendGauge(ch, coreCountDesc, float64(coresAlloc[node.Id]), co.nodeName, nodeLabel, "allocation")
 		}
-		ch <- m
 	}
+}
+
+func tryToSendGauge(ch chan<- prometheus.Metric, desc *prometheus.Desc, value float64, labels ...string) {
+	m, err := prometheus.NewConstMetric(
+		desc,
+		prometheus.GaugeValue,
+		value,
+		labels...,
+	)
+	if err != nil {
+		klog.Warningf("failed to create metric %q: %v", desc.String(), err)
+	}
+	ch <- m
 }
