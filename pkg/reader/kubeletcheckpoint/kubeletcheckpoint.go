@@ -53,7 +53,23 @@ func (r *Reader) GetCoresAllocation(tp sysfs.Topology) (CoresAllocation, error) 
 		return nil, err
 	}
 
-	var coresAlloc CoresAllocation
+	coresAlloc := make(CoresAllocation)
+	for pod := range checkpoint.Entries {
+		for container, cpuString := range checkpoint.Entries[pod] {
+			cntCPUSet, err := cpuset.Parse(cpuString)
+			if err != nil {
+				return nil, fmt.Errorf("could not parse cpuset %q for container %q in pod %q: %v", cpuString, container, pod, err)
+			}
+			for _, coreId := range cntCPUSet.ToSlice() {
+				numaId, ok := core2numa[coreId]
+				if !ok {
+					klog.Warningf("unknown NUMA node id for core %d in cpuset %q for container id %q", coreId, cpuString, container, pod)
+				}
+				coresAlloc[numaId]++
+			}
+		}
+	}
+	/* 1.17
 	for containerID, cpuString := range checkpoint.Entries {
 		cntCPUSet, err := cpuset.Parse(cpuString)
 		if err != nil {
@@ -67,5 +83,6 @@ func (r *Reader) GetCoresAllocation(tp sysfs.Topology) (CoresAllocation, error) 
 			coresAlloc[numaId]++
 		}
 	}
+	*/
 	return coresAlloc, nil
 }
