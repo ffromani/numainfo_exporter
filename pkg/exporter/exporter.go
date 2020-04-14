@@ -62,19 +62,32 @@ func NewExporter() *Exporter {
 	}
 }
 
+func getHostname() (string, error) {
+	var err error
+	var hostname string
+
+	if hostname = os.Getenv("NUMAINFO_NODENAME"); hostname != "" {
+		return hostname, nil
+	}
+	if hostname, err = os.Hostname(); err == nil {
+		return hostname, nil
+	}
+	return "", err
+}
+
 func (exp *Exporter) ParseFlags() error {
 	pflag.StringVarP(&exp.TLSInfo.CertFilePath, "cert-file", "c", "", "override path to TLS certificate - you need also the key to enable TLS")
 	pflag.StringVarP(&exp.TLSInfo.KeyFilePath, "key-file", "k", "", "override path to TLS key - you need also the cert to enable TLS")
-	pflag.StringVarP(&exp.ListenAddress, "listen-address", "L", ":9091", "listening address for the server")
+	pflag.StringVarP(&exp.ListenAddress, "listen-address", "L", ":19091", "listening address for the server")
 	pflag.BoolVarP(&exp.DumpMode, "dump-metrics", "M", false, "dump the available metrics and exit")
-	pflag.StringVarP(&exp.Nodename, "node-name", "N", "", "node identifier. Defaults to localhost")
+	pflag.StringVarP(&exp.Nodename, "node-name", "N", "", "node identifier.")
 	pflag.StringVarP(&exp.SysFSDir, "sysfs", "Y", "/sys", "base root directory where sysfs is mounted")
 	pflag.StringVarP(&exp.KubeStateDir, "kube-state", "K", "/var/lib/kubelet", "base root directory where the kubelet state files are stored")
 
 	pflag.Parse()
 
 	if exp.Nodename == "" {
-		hostname, err := os.Hostname()
+		hostname, err := getHostname()
 		if err != nil {
 			return err
 		}
