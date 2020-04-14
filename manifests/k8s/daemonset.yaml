@@ -6,6 +6,9 @@ metadata:
   labels:
     app: numainfo-exporter
 spec:
+  selector:
+    matchLabels:
+      name: numainfo-exporter
   template:
     metadata:
       labels:
@@ -15,7 +18,6 @@ spec:
         prometheus.io/port: "19091"
     spec:
       serviceAccountName: numainfo-exporter
-      hostPID: true
       nodeSelector:
         node-role.kubernetes.io/worker: ""
       containers:
@@ -25,7 +27,7 @@ spec:
           protocol: "TCP"
           name: "metrics"
         image: quay.io/fromani/numainfo_exporter:devel
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         command:
         - numainfo_exporter
         - -v=5
@@ -34,6 +36,10 @@ spec:
         volumeMounts:
         - name: kube-state
           mountPath: /kubestate
+          readOnly: true
+        - name: sys-fs
+          mountPath: /sys
+          readOnly: true
         env:
         - name: NUMAINFO_NODENAME
           valueFrom:
@@ -43,4 +49,6 @@ spec:
       - name: kube-state
         hostPath:
           path: /var/lib/kubelet
-
+      - name: sys-fs
+        hostPath:
+          path: /sys
