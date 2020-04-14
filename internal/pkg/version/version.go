@@ -5,6 +5,6 @@ package version
 const (
   Component = "numainfo_exporter"
   Branch = "master"
-  Revision = "901ac1d"
+  Revision = "4ecde89"
   Version = "devel"
 )

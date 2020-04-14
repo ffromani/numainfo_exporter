@@ -121,7 +121,7 @@ func (exp *Exporter) Run() {
 		os.Exit(1)
 	}
 
-	klog.V(2).Info("%s started", verinfo.Component)
+	klog.V(2).Infof("%s started", verinfo.Component)
 	defer klog.V(2).Infof("%s stopped", verinfo.Component)
 
 	http.Handle("/metrics", promhttp.Handler())

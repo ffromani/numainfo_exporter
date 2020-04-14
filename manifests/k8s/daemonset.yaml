@@ -1,20 +1,20 @@
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: numainfo_exporter
+  name: numainfo-exporter
   labels:
-    app: numainfo_exporter
+    app: numainfo-exporter
 spec:
   template:
     metadata:
       labels:
-        name: numainfo_exporter
+        name: numainfo-exporter
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "19091"
     spec:
-      serviceAccountName: numainfo_exporter
+      serviceAccountName: numainfo-exporter
       hostPID: true
       nodeSelector:
         node-role.kubernetes.io/worker: ""
@@ -29,9 +29,18 @@ spec:
         command:
         - numainfo_exporter
         - -v=5
-        - -L:19091
+        - -L=:19091
+        - -K=/kubestate
+        volumeMounts:
+        - name: kube-state
+          mountPath: /kubestate
         env:
         - name: NUMAINFO_NODENAME
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
+      volumes:
+      - name: kube-state
+        hostPath:
+          path: /var/lib/kubelet
+
