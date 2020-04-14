@@ -1,0 +1,37 @@
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: numainfo_exporter
+  labels:
+    app: numainfo_exporter
+spec:
+  template:
+    metadata:
+      labels:
+        name: numainfo_exporter
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "19091"
+    spec:
+      serviceAccountName: numainfo_exporter
+      hostPID: true
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+      - name: collector
+        ports:
+        - containerPort: 19091
+          protocol: "TCP"
+          name: "metrics"
+        image: quay.io/fromani/numainfo_exporter:devel
+        imagePullPolicy: IfNotPresent
+        command:
+        - numainfo_exporter
+        - -v=5
+        - -L:19091
+        env:
+        - name: NUMAINFO_NODENAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName

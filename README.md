@@ -28,6 +28,31 @@ supported way, and we will contribute to the design and implementation effort in
   interface -the tool can for example also feed a CRD-, but doing so allows to integrate nicely with the ongoing (202004) efforts
   to enhance the kubernetes scheduler, like the [telemetry-aware scheduling](https://github.com/intel/telemetry-aware-scheduling).
 
+## Available metrics
+
+To get the currently available metrics, you can run
+```bash
+$ ./numainfo_exporter -K /var/tmp -N test.k8s.io -M 2>&1 | grep numainfo
+```
+
+Example output:
+```bash
+# HELP numainfo_core_count CPU cores per NUMA node, count.
+# TYPE numainfo_core_count gauge
+numainfo_core_count{node="test.k8s.io",numanode="node00",type="capacity"} 4
+# HELP numainfo_node_count NUMA nodes per node, count.
+# TYPE numainfo_node_count gauge
+numainfo_node_count{node="test.k8s.io"} 1
+# HELP numainfo_version Version information
+# TYPE numainfo_version gauge
+numainfo_version{branch="master",goversion="go1.13.9",kubeversion="devel",revision="15ced69",version="1"} 1
+
+```
+
+In this case the "allocation" label is missing, because this output was taken from a developer laptop with no kubelet running
+(this is also the reason for the option `-K` in the aforementioned example).
+
+
 ## license
 (C) 2020 Red Hat Inc and licensed under the Apache License v2
 
