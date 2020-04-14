@@ -28,6 +28,10 @@ supported way, and we will contribute to the design and implementation effort in
   interface -the tool can for example also feed a CRD-, but doing so allows to integrate nicely with the ongoing (202004) efforts
   to enhance the kubernetes scheduler, like the [telemetry-aware scheduling](https://github.com/intel/telemetry-aware-scheduling).
 
+## Requirements:
+
+`numainfo_exporter` works with and requires kubernetes >= 1.18.0.
+
 ## Available metrics
 
 To get the currently available metrics, you can run
@@ -51,6 +55,22 @@ numainfo_version{branch="master",goversion="go1.13.9",kubeversion="devel",revisi
 
 In this case the "allocation" label is missing, because this output was taken from a developer laptop with no kubelet running
 (this is also the reason for the option `-K` in the aforementioned example).
+
+Another example:
+```bash
+# HELP numainfo_core_count CPU cores per NUMA node, count.
+# TYPE numainfo_core_count gauge
+numainfo_core_count{node="kind-worker",numanode="node00",type="allocation"} 1
+numainfo_core_count{node="kind-worker",numanode="node00",type="capacity"} 12
+# HELP numainfo_node_count NUMA nodes per node, count.
+# TYPE numainfo_node_count gauge
+numainfo_node_count{node="kind-worker"} 1
+# HELP numainfo_version Version information
+# TYPE numainfo_version gauge
+numainfo_version{branch="kube118",goversion="go1.13.9",kubeversion="devel",revision="434f808",version="1"} 1
+```
+
+This is from a live multi-master, multi-worker [kind](https://kubernetes.io/docs/setup/learning-environment/kind/) cluster.
 
 
 ## license
