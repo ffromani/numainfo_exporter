@@ -53,7 +53,7 @@ func (r *Reader) GetCoresAllocation(tp sysfs.Topology) (CoresAllocation, error) 
 		return nil, err
 	}
 
-	var coresAlloc CoresAllocation
+	coresAlloc := make(CoresAllocation)
 	for pod := range checkpoint.Entries {
 		for container, cpuString := range checkpoint.Entries[pod] {
 			cntCPUSet, err := cpuset.Parse(cpuString)
