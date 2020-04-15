@@ -41,6 +41,13 @@ supported way, and we will contribute to the design and implementation effort in
 Please note that only the bullet point 3 above is `numainfo_exporter` specific. The other bullet points affect any *external* tool which
 peeks into the kubelet state.
 
+## Available metrics
+
+1. cpu cores (cpumanager) - since 20200415
+2. devices (devicemanager) - TBD
+3. hugepages (memorymanager) - PR pending on k8s u/s
+4. ...
+
 ## Requirements:
 
 `numainfo_exporter` works with and requires kubernetes >= 1.18.0.
