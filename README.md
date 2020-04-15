@@ -85,6 +85,7 @@ make
 ```
 
 ## Container image
-TBD
 
-
+```bash
+podman pull quay.io/fromani/numainfo_exporter:devel
+```
