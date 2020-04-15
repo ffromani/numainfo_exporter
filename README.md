@@ -28,6 +28,19 @@ supported way, and we will contribute to the design and implementation effort in
   interface -the tool can for example also feed a CRD-, but doing so allows to integrate nicely with the ongoing (202004) efforts
   to enhance the kubernetes scheduler, like the [telemetry-aware scheduling](https://github.com/intel/telemetry-aware-scheduling).
 
+## Open issues
+
+1. In rapidly-changing (pods created/destroyed frequently) the data reported by `numainfo_exporter` can get stale fast because
+   the reporting is completely asynchronous with respect to the kubelet.
+   This cannot be fixed, and can only be improved by making the `numainfo_exporter` push updates, which doesn't fit the prometheus model.
+2. There is no way to avoid races with kubelet. `numainfo_exporter`. This means some pull cycles may unpredictably return no fresh data.
+   This cannot be fixed. The only way to avoid that is extend the kubelet to export the same data `numainfo_exporter` provides (e.g. new API).
+3. There is a dependency on the (private) checkpoint files internal format. Each version of `numainfo_exporter` is tied to a specific
+   kubernetes version. This can be improved somehow, but never really solved.
+
+Please note that only the bullet point 3 above is `numainfo_exporter` specific. The other bullet points affect any *external* tool which
+peeks into the kubelet state.
+
 ## Requirements:
 
 `numainfo_exporter` works with and requires kubernetes >= 1.18.0.
