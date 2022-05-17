@@ -31,7 +31,7 @@ build-version:
 
 build: build-prepare-dir build-version
 	@echo "Building binary"
-	env GOOS=$(TARGET_GOOS) GOARCH=$(TARGET_GOARCH) go build -i -ldflags="-s -w" -mod=vendor -o _output/bin/numainfo_exporter ./cmd/numainfo_exporter
+	env GOOS=$(TARGET_GOOS) GOARCH=$(TARGET_GOARCH) go build -ldflags="-s -w" -mod=vendor -o _output/bin/numainfo_exporter ./cmd/numainfo_exporter
 
 deps-update:
 	go mod tidy && \
